@@ -3,17 +3,22 @@ class Game {
     this._board = new Board(numberOfRows, numberOfColumns, numberOfBombs);
   }
 
-  playMove(rowIndex, ColumnIndex) {
+  playMove(rowIndex, columnIndex) {
     this._board.flipTile(rowIndex, columnIndex);
     if (this._board.playerBoard[rowIndex][columnIndex] === 'B') {
       console.log('Game Over! This is the final board:');
       this._board.print();
     } else if (this.hasSafeTiles()) {
-      console.log('You Won!');
-    } else {
       console.log('Current Board: ');
-      this._Board;
+      this._board.print();
+    } else {
+      console.log('Play again!');
+      this._board.print();
     }
+  }
+
+  hasSafeTiles() {
+    return this._numberOfTiles !== this._numberOfBombs;
   }
 }
 
@@ -30,14 +35,17 @@ class Board {
     return this._playerBoard;
   }
 
-  flipTile(rowIndex, columnIndex) {
-    if (this.playerBoard[rowIndex][columnIndex] !== ' ') {
+  flipTile(flipRow, flipColumn) {
+    // Check if tile is empty/already flipped, if so, return
+    if (this.playerBoard[flipRow][flipColumn] !== ' ') {
       console.log('This tile has already been flipped!');
       return;
-    } else if (this._bombBoard[rowIndex][columnIndex] === 'B') {
-      this.playerBoard[rowIndex][columnIndex] = 'B';
+    // Check if tile is a bomb, if so, place a BOMB in player Board
+    } else if (this._bombBoard[flipRow][flipColumn] === 'B') {
+      this.playerBoard[flipRow][flipColumn] = 'B';
+    // If tile is not a bomb place number of surrounding BOMBS on player Board
     } else {
-      this.playerBoard[rowIndex][columnIndex] = this.getNumberOfNeighborBombs(rowIndex, columnIndex);
+      this.playerBoard[flipRow][flipColumn] = this.getNumberOfNeighborBombs(flipRow, flipColumn);
     }
     this._numberOfTiles--;
   }
@@ -55,31 +63,27 @@ class Board {
     ];
     const numberOfRows = this._bombBoard.length;
     const numberOfColumns = this._bombBoard[0].length;
-    this._numberOfBombs = 0;
+    this._numberOfSurroundingBombs = 0;
 
     neighborOffsets.forEach((offset) => {
       const neighborRowIndex = rowIndex + offset[0];
       const neighborColumnIndex = columnIndex + offset[1];
       if (neighborRowIndex >= 0
-      && neighborRowIndex <= numberOfRows
+      && neighborRowIndex < numberOfRows
       && neighborColumnIndex >= 0
-      && neighborColumnIndex <= numberOfColumns) {
+      && neighborColumnIndex < numberOfColumns) {
         if (this._bombBoard[neighborRowIndex][neighborColumnIndex] === 'B') {
-          this._numberOfBombs++;
+          this._numberOfSurroundingBombs++;
         }
       }
     });
 
-    return this._numberOfBombs;
+    return this._numberOfSurroundingBombs;
     // purpose of this function is return the number of bombs in an adjacent neighbor.
   }
 
-  hasSafeTiles() {
-    return this._numberOfTiles !== this._numberOfBombs;
-  }
-
-  print(board) {
-    console.log(board.map((row) => {
+  print() {
+    console.log(this._playerBoard.map((row) => {
       return row.join(' | ');
     }).join('\n'));
   }
@@ -117,22 +121,3 @@ class Board {
     return board;
   }
 }
-
-
-const g = new Game(3, 3, 3);
-g.playMove(0, 0);
-
-/*
-const board = new Board(6, 6, 4);
-
-const playerBoard = board.playerBoard;
-const bombBoard = board.bombBoard;
-
-console.log('Player Board: ');
-print(playerBoard);
-console.log('Bomb Board: ');
-print(bombBoard);
-
-flipTile(playerBoard, bombBoard, 0, 0);
-console.log('Updated Player Board:');
-printBoard(playerBoard); */
